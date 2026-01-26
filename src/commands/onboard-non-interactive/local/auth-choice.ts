@@ -16,6 +16,7 @@ import {
   applyKimiCodeConfig,
   applyMinimaxApiConfig,
   applyMinimaxConfig,
+  applyModelverseConfig,
   applyMoonshotConfig,
   applyOpencodeZenConfig,
   applyOpenrouterConfig,
@@ -26,6 +27,7 @@ import {
   setAnthropicApiKey,
   setGeminiApiKey,
   setKimiCodeApiKey,
+  setModelverseApiKey,
   setMinimaxApiKey,
   setMoonshotApiKey,
   setOpencodeZenApiKey,
@@ -177,6 +179,25 @@ export async function applyNonInteractiveAuthChoice(params: {
     process.env.OPENAI_API_KEY = key;
     runtime.log(`Saved OPENAI_API_KEY to ${shortenHomePath(result.path)}`);
     return nextConfig;
+  }
+
+  if (authChoice === "modelverse-api-key") {
+    const resolved = await resolveNonInteractiveApiKey({
+      provider: "modelverse",
+      cfg: baseConfig,
+      flagValue: opts.modelverseApiKey,
+      flagName: "--modelverse-api-key",
+      envVar: "MODELVERSE_API_KEY",
+      runtime,
+    });
+    if (!resolved) return null;
+    if (resolved.source !== "profile") await setModelverseApiKey(resolved.key);
+    nextConfig = applyAuthProfileConfig(nextConfig, {
+      profileId: "modelverse:default",
+      provider: "modelverse",
+      mode: "api_key",
+    });
+    return applyModelverseConfig(nextConfig);
   }
 
   if (authChoice === "openrouter-api-key") {
