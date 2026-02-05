@@ -12,6 +12,11 @@ import {
 } from "./cloudflare-ai-gateway.js";
 import { resolveAwsSdkEnvVarName, resolveEnvApiKey } from "./model-auth.js";
 import {
+  buildModelverseModelDefinition,
+  MODELVERSE_BASE_URL,
+  MODELVERSE_MODEL_CATALOG,
+} from "./modelverse-models.js";
+import {
   buildSyntheticModelDefinition,
   SYNTHETIC_BASE_URL,
   SYNTHETIC_MODEL_CATALOG,
@@ -398,6 +403,14 @@ async function buildOllamaProvider(): Promise<ProviderConfig> {
   };
 }
 
+function buildModelverseProvider(): ProviderConfig {
+  return {
+    baseUrl: MODELVERSE_BASE_URL,
+    api: "openai-completions",
+    models: MODELVERSE_MODEL_CATALOG.map(buildModelverseModelDefinition),
+  };
+}
+
 export async function resolveImplicitProviders(params: {
   agentDir: string;
 }): Promise<ModelsConfig["providers"]> {
@@ -440,6 +453,13 @@ export async function resolveImplicitProviders(params: {
     resolveApiKeyFromProfiles({ provider: "venice", store: authStore });
   if (veniceKey) {
     providers.venice = { ...(await buildVeniceProvider()), apiKey: veniceKey };
+  }
+
+  const modelverseKey =
+    resolveEnvApiKeyVarName("modelverse") ??
+    resolveApiKeyFromProfiles({ provider: "modelverse", store: authStore });
+  if (modelverseKey) {
+    providers.modelverse = { ...buildModelverseProvider(), apiKey: modelverseKey };
   }
 
   const qwenProfiles = listProfilesForProvider(authStore, "qwen-portal");

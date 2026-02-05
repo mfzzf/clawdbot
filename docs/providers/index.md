@@ -48,6 +48,7 @@ See [Venice AI](/providers/venice).
 - [Xiaomi](/providers/xiaomi)
 - [GLM models](/providers/glm)
 - [MiniMax](/providers/minimax)
+- [Modelverse (OpenAI-compatible)](/providers/modelverse)
 - [Venice (Venice AI, privacy-focused)](/providers/venice)
 - [Ollama (local models)](/providers/ollama)
 

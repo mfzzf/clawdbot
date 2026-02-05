@@ -5,6 +5,12 @@ import {
 } from "../agents/cloudflare-ai-gateway.js";
 import { buildXiaomiProvider, XIAOMI_DEFAULT_MODEL_ID } from "../agents/models-config.providers.js";
 import {
+  buildModelverseModelDefinition,
+  MODELVERSE_BASE_URL,
+  MODELVERSE_DEFAULT_MODEL_REF,
+  MODELVERSE_MODEL_CATALOG,
+} from "../agents/modelverse-models.js";
+import {
   buildSyntheticModelDefinition,
   SYNTHETIC_BASE_URL,
   SYNTHETIC_DEFAULT_MODEL_REF,
@@ -304,6 +310,75 @@ export function applyMoonshotConfig(cfg: OpenClawConfig): OpenClawConfig {
               }
             : undefined),
           primary: MOONSHOT_DEFAULT_MODEL_REF,
+        },
+      },
+    },
+  };
+}
+
+export function applyModelverseProviderConfig(cfg: OpenClawConfig): OpenClawConfig {
+  const models = { ...cfg.agents?.defaults?.models };
+  models[MODELVERSE_DEFAULT_MODEL_REF] = {
+    ...models[MODELVERSE_DEFAULT_MODEL_REF],
+    alias: models[MODELVERSE_DEFAULT_MODEL_REF]?.alias ?? "Modelverse",
+  };
+
+  const providers = { ...cfg.models?.providers };
+  const existingProvider = providers.modelverse;
+  const existingModels = Array.isArray(existingProvider?.models) ? existingProvider.models : [];
+  const modelverseModels = MODELVERSE_MODEL_CATALOG.map(buildModelverseModelDefinition);
+  const mergedModels = [
+    ...existingModels,
+    ...modelverseModels.filter(
+      (model) => !existingModels.some((existing) => existing.id === model.id),
+    ),
+  ];
+  const { apiKey: existingApiKey, ...existingProviderRest } = (existingProvider ?? {}) as Record<
+    string,
+    unknown
+  > as { apiKey?: string };
+  const resolvedApiKey = typeof existingApiKey === "string" ? existingApiKey : undefined;
+  const normalizedApiKey = resolvedApiKey?.trim();
+  providers.modelverse = {
+    ...existingProviderRest,
+    baseUrl: MODELVERSE_BASE_URL,
+    api: "openai-completions",
+    ...(normalizedApiKey ? { apiKey: normalizedApiKey } : {}),
+    models: mergedModels.length > 0 ? mergedModels : modelverseModels,
+  };
+
+  return {
+    ...cfg,
+    agents: {
+      ...cfg.agents,
+      defaults: {
+        ...cfg.agents?.defaults,
+        models,
+      },
+    },
+    models: {
+      mode: cfg.models?.mode ?? "merge",
+      providers,
+    },
+  };
+}
+
+export function applyModelverseConfig(cfg: OpenClawConfig): OpenClawConfig {
+  const next = applyModelverseProviderConfig(cfg);
+  const existingModel = next.agents?.defaults?.model;
+  return {
+    ...next,
+    agents: {
+      ...next.agents,
+      defaults: {
+        ...next.agents?.defaults,
+        model: {
+          ...(existingModel && "fallbacks" in (existingModel as Record<string, unknown>)
+            ? {
+                fallbacks: (existingModel as { fallbacks?: string[] }).fallbacks,
+              }
+            : undefined),
+          primary: MODELVERSE_DEFAULT_MODEL_REF,
         },
       },
     },

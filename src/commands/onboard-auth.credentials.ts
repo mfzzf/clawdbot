@@ -75,6 +75,19 @@ export async function setMoonshotApiKey(key: string, agentDir?: string) {
   });
 }
 
+export async function setModelverseApiKey(key: string, agentDir?: string) {
+  // Write to resolved agent dir so gateway finds credentials on startup.
+  upsertAuthProfile({
+    profileId: "modelverse:default",
+    credential: {
+      type: "api_key",
+      provider: "modelverse",
+      key,
+    },
+    agentDir: resolveAuthAgentDir(agentDir),
+  });
+}
+
 export async function setKimiCodingApiKey(key: string, agentDir?: string) {
   // Write to resolved agent dir so gateway finds credentials on startup.
   upsertAuthProfile({
