@@ -127,15 +127,6 @@ export const ASTRAFLOW_MODEL_CATALOG: ModelDefinitionConfig[] = [
     maxTokens: 16384,
     cost: GPT_52_COST,
   },
-  {
-    id: "gpt-5.2-chat",
-    name: "GPT-5.2 Chat",
-    reasoning: false,
-    input: ["text", "image"],
-    contextWindow: 128000,
-    maxTokens: 16384,
-    cost: GPT_52_COST,
-  },
   // DeepSeek V3.2
   {
     id: "deepseek-ai/DeepSeek-V3.2",

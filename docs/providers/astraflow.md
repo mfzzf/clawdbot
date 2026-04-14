@@ -74,6 +74,12 @@ or `ASTRAFLOW_CN_API_KEY` is available to that process (for example, in
 `~/.openclaw/.env` or via `env.shellEnv`).
 </Warning>
 
+<Tip>
+Base URLs can be overridden with `ASTRAFLOW_BASE_URL` (default:
+`https://api-us-ca.umodelverse.ai/v1`) and `ASTRAFLOW_CN_BASE_URL` (default:
+`https://api.modelverse.cn/v1`) for self-hosted or testing deployments.
+</Tip>
+
 ## Built-in catalog
 
 ### Global catalog
